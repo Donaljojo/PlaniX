@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.so
+*.egg-info/
+*.egg
+
+# Django
+db.sqlite3
+/staticfiles/
+/media/
+/static/
+.env
+.env.*
+!.env.example
+
+# VS Code / Codespaces
+.vscode/
+.history/
+*.code-workspace
+
+# Byte-compiled / optimized files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Virtualenv
+venv/
+.envs/
+.envrc
+
+# Django collected static files
+staticfiles/
+static/
+
+# Compiled UI files
+node_modules/
+npm-debug.log
+
+# OS / System files
+.DS_Store
+Thumbs.db
+
+# Python build
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Pyre & Pytype
+.pyre/
+.pytype/
+
+# MyPy
+.mypy_cache/
+
+# IDE-specific
+.idea/
+*.swp
+*.swo

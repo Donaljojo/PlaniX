@@ -26,11 +26,11 @@ def _get_available_model():
         models = genai.list_models()
 
         preferred_order = [
+            "gemini-1.0-pro",
             "gemini-1.5-flash",
             "gemini-1.5-flash-latest",
             "gemini-1.5-flash-8b",
             "gemini-1.5-pro",
-            "gemini-1.0-pro",
         ]
 
         available = [m.name for m in models if "generateContent" in m.supported_generation_methods]
@@ -41,12 +41,15 @@ def _get_available_model():
                 return model
 
         if available:
+            print(f"Available models: {available}")
             _cached_model = available[0]
             return available[0]
 
+        print("No models available.")
         return None
 
-    except Exception:
+    except Exception as e:
+        print(f"Error listing models: {e}")
         return None
 
 
@@ -95,7 +98,7 @@ SECURITY TESTING PLAN
     model_name = _get_available_model()
 
     if not model_name:
-        return "ERROR: No supported Gemini model available."
+        return "ERROR: No supported Gemini model available. Please ensure your API key is correct and that you have access to a model that supports 'generateContent'."
 
     try:
         model = genai.GenerativeModel(model_name)

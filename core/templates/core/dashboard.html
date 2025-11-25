@@ -2,9 +2,17 @@
 
 <a href="{% url 'create_project' %}">+ New Project</a>
 
+
 <ul>
     {% for project in projects %}
-        <li>{{ project.name }} — {{ project.platform }} — {{ project.created_at }}</li>
+        <li>
+             {{ project.name }} — {{ project.platform }} — {{ project.created_at }}
+
+    <!-- Add this action link -->
+    <a href="{% url 'generate_analysis' project.id %}">
+        Generate Secure Analysis
+    </a>
+        </li>
     {% empty %}
         <p>No projects yet.</p>
     {% endfor %}

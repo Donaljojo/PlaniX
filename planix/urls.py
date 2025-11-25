@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from core.views import dashboard, create_project
+from core.views.analysis_views import generate_analysis
+from core.views.analysis_views import view_analysis
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,5 +28,7 @@ urlpatterns = [
 
     path('', dashboard, name='dashboard'),
     path('project/create/', create_project, name='create_project'),
+    path('project/<int:project_id>/analyze/', generate_analysis, name='generate_analysis'),
+    path('analysis/<int:analysis_id>/', view_analysis, name='view_analysis'),
 ]
 

@@ -1,42 +1,110 @@
 import os
-import requests
+import google.generativeai as genai
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Configure Gemini if key exists
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
+_cached_model = None
+
+
+def _get_available_model():
+    """
+    Fetch available Gemini models and select one that supports generateContent.
+    """
+    global _cached_model
+
+    if _cached_model:
+        return _cached_model
+
+    if not GEMINI_API_KEY:
+        return None
+
+    try:
+        models = genai.list_models()
+
+        preferred_order = [
+            "gemini-1.5-flash",
+            "gemini-1.5-flash-latest",
+            "gemini-1.5-flash-8b",
+            "gemini-1.5-pro",
+            "gemini-1.0-pro",
+        ]
+
+        available = [m.name for m in models if "generateContent" in m.supported_generation_methods]
+
+        for model in preferred_order:
+            if model in available:
+                _cached_model = model
+                return model
+
+        if available:
+            _cached_model = available[0]
+            return available[0]
+
+        return None
+
+    except Exception:
+        return None
 
 
 def generate_ai_analysis(prompt):
-    if not GROQ_API_KEY:
-        return "ERROR: No GROQ API key configured."
+    """
+SYSTEM ARCHITECTURE
+- Multi-tier architecture with presentation, application, and data layers
+- Secure API gateway enforcing authentication and rate limiting
+- Encrypted data storage using industry-standard cryptography
+- Logging and monitoring pipeline for audit and incident response
 
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json",
-    }
+THREAT MODEL (STRIDE + OWASP)
+- Spoofing: enforce MFA and token-based identity
+- Tampering: input validation and integrity checks
+- Repudiation: centralized immutable audit logs
+- Information Disclosure: encryption in transit and at rest
+- Denial of Service: WAF + throttling controls
+- Elevation of Privilege: RBAC with least privilege principles
+- OWASP Top 10 mapped to mitigation controls
 
-    body = {
-        "model": "llama3-8b-8192",  # ✅ confirmed working model
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are an expert in secure software architecture, threat modeling "
-                    "(STRIDE and OWASP), secure SDLC planning, security testing methodology, "
-                    "and cost estimation for secure development projects."
-                )
-            },
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3
-    }
+SECURE SDLC PLAN
+- Requirements phase includes threat modeling checkpoints
+- Secure design reviews before implementation stages
+- Static code analysis integrated into CI pipeline
+- Dependency scanning and SBOM tracking
+- Pre-deployment penetration testing
+- Continuous security monitoring after release
 
-    response = requests.post(GROQ_API_URL, headers=headers, json=body)
+COST ESTIMATION
+- Development effort: medium complexity, 3–5 engineer months
+- Hosting and infrastructure: scalable cloud deployment
+- Security tooling cost ranges provided per testing model
+- Optional add-on: managed security services considerations
 
-    if response.status_code == 200:
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
-    else:
-        return f"API Error: {response.text}"
+SECURITY TESTING PLAN
+- SAST, DAST, IAST, and SCA toolchain alignment
+- API fuzz testing and business logic abuse detection
+- Automated regression security suite
+- Red-team simulation and reporting cycle
+"""
 
 
+    if not GEMINI_API_KEY:
+        return "ERROR: No Gemini API key configured."
 
+    model_name = _get_available_model()
+
+    if not model_name:
+        return "ERROR: No supported Gemini model available."
+
+    try:
+        model = genai.GenerativeModel(model_name)
+        response = model.generate_content(prompt)
+
+        if hasattr(response, "text"):
+            return response.text
+
+        return "ERROR: No text response from model."
+
+    except Exception as e:
+        return f"AI Error: {str(e)}"

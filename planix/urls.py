@@ -14,10 +14,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from core.views import dashboard, create_project
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+
+    # ✅ Add this line to enable login/logout pages
+    path('accounts/', include('django.contrib.auth.urls')),
+
+    path('', dashboard, name='dashboard'),
+    path('project/create/', create_project, name='create_project'),
 ]
+

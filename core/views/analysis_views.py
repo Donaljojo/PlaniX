@@ -70,11 +70,18 @@ def view_analysis(request, analysis_id):
     return render(request, "core/view_analysis.html", {"analysis": analysis, "project": analysis.project})
 
 
+
 @login_required
 def history_analysis(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
-    analyses = project.analyses.all().order_by("-created_at")
-    return render(request, "core/analysis_history.html", {"project": project, "analyses": analyses})
 
+    analyses = ProjectAnalysis.objects.filter(
+        project=project
+    ).order_by("-created_at")
+
+    return render(request, "core/analysis_history.html", {
+        "project": project,
+        "analyses": analyses
+    })
 
 

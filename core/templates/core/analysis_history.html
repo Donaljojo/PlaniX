@@ -12,6 +12,20 @@
                     <a href="{% url 'view_analysis' analysis.id %}" class="btn btn-primary btn-sm">
                         View
                     </a>
+                    {% if analysis.risk_category == "High Risk" %}
+    <span class="badge bg-danger">
+        {{ analysis.risk_category }} — {{ analysis.security_score }}
+    </span>
+{% elif analysis.risk_category == "Medium Risk" %}
+    <span class="badge bg-warning text-dark">
+        {{ analysis.risk_category }} — {{ analysis.security_score }}
+    </span>
+{% else %}
+    <span class="badge bg-success">
+        {{ analysis.risk_category }} — {{ analysis.security_score }}
+    </span>
+{% endif %}
+
                 </li>
             {% endfor %}
         </ul>

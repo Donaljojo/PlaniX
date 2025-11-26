@@ -19,6 +19,17 @@
         View Analysis History
     </a>
 
+    {% if project.analyses.last %}
+    {% with analysis=project.analyses.last %}
+        {% if analysis.risk_category == "High Risk" %}
+            <span class="badge bg-danger">High Risk — {{ analysis.security_score }}</span>
+        {% elif analysis.risk_category == "Medium Risk" %}
+            <span class="badge bg-warning text-dark">Medium Risk — {{ analysis.security_score }}</span>
+        {% else %}
+            <span class="badge bg-success">Low Risk — {{ analysis.security_score }}</span>
+        {% endif %}
+    {% endwith %}
+    {% endif %}
         </li>
     {% empty %}
         <p>No projects yet.</p>

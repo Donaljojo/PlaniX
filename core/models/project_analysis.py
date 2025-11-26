@@ -15,6 +15,10 @@ class ProjectAnalysis(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    security_score = models.IntegerField(default=0)
+    risk_category = models.CharField(max_length=20, default="Unknown")
+
+
     def __str__(self):
         return f"Analysis for {self.project.name} ({self.created_at})"
 

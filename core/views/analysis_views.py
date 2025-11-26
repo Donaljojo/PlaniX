@@ -6,6 +6,8 @@ from core.services.ai_client import generate_ai_analysis
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from core.services.security_scoring import calculate_final_security_score
+from django.contrib import messages
 
 
 def extract_section(text, header):
@@ -23,46 +25,54 @@ def extract_section(text, header):
             break
     return section.strip()
 
-
 @login_required
 def generate_analysis(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
 
     prompt = f"""
-    Generate a secure system analysis for:
-    Name: {project.name}
-    Description: {project.description}
-    Platform: {project.platform}
-    Tech Stack: {project.tech_stack}
-    Scale: {project.scale}
-    Budget: {project.budget}
-    Risk Level: {project.risk_level}
+Generate a secure system analysis for:
+Name: {project.name}
+Description: {project.description}
+Platform: {project.platform}
+Tech Stack: {project.tech_stack}
+Scale: {project.scale}
+Budget: {project.budget}
+Risk Level: {project.risk_level}
 
-    Provide:
-    1. System architecture
-    2. Threat model (STRIDE + OWASP relevance)
-    3. Cost estimation guidance
-    4. Recommended secure SDLC practices
-    5. Security testing plan and tool recommendations
-    """
+Provide:
+1. SYSTEM ARCHITECTURE
+2. THREAT MODEL (STRIDE + OWASP relevance)
+3. COST ESTIMATION guidance
+4. SECURE SDLC recommendations
+5. SECURITY TESTING PLAN and tools
+"""
 
-    result = generate_ai_analysis(prompt)
+    generated_text = generate_ai_analysis(prompt)
 
-    architecture = extract_section(result, "SYSTEM ARCHITECTURE")
-    threat_model = extract_section(result, "THREAT MODEL")
-    sdls_recommendations = extract_section(result, "SECURE SDLC")
-    cost_estimation = extract_section(result, "COST")
-    testing_plan = extract_section(result, "SECURITY TESTING PLAN")
+    architecture = extract_section(generated_text, "SYSTEM ARCHITECTURE")
+    threat_model = extract_section(generated_text, "THREAT MODEL")
+    cost_estimation = extract_section(generated_text, "COST")
+    sdls_recommendations = extract_section(generated_text, "SECURE SDLC")
+    testing_plan = extract_section(generated_text, "SECURITY TESTING PLAN")
 
+    # Save initial analysis
     analysis = ProjectAnalysis.objects.create(
         project=project,
         user=request.user,
         architecture=architecture,
         threat_model=threat_model,
-        sdls_recommendations=sdls_recommendations,
         cost_estimation=cost_estimation,
+        sdls_recommendations=sdls_recommendations,
         testing_plan=testing_plan,
     )
+
+    # ✅ Hybrid security scoring applied here
+    score, category = calculate_final_security_score(project)
+    analysis.security_score = score
+    analysis.risk_category = category
+    analysis.save()
+
+    messages.success(request, f"Security analysis generated — Risk rating: {category} ({score})")
 
     return redirect("view_analysis", analysis_id=analysis.id)
 

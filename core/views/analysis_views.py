@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from core.models.project import Project
 from core.models.project_analysis import ProjectAnalysis
 from core.services.ai_client import generate_ai_analysis
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 
 def extract_section(text, header):
@@ -84,4 +87,18 @@ def history_analysis(request, project_id):
         "analyses": analyses
     })
 
+@login_required
+def download_analysis_pdf(request, analysis_id):
+    analysis = get_object_or_404(ProjectAnalysis, id=analysis_id, user=request.user)
+    project = analysis.project
 
+    html_content = render_to_string("core/analysis_pdf.html", {
+        "analysis": analysis,
+        "project": project
+    })
+
+    pdf_file = HTML(string=html_content).write_pdf()
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="analysis_{analysis_id}.pdf"'
+    return response

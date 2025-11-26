@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ project.name }} - Security Analysis Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        h1, h2 { color: #1a237e; }
+        .section { margin-bottom: 25px; }
+        .label { font-weight: bold; font-size: 18px; margin-bottom: 8px; }
+        pre { white-space: pre-wrap; font-size: 14px; }
+    </style>
+</head>
+
+<body>
+    <h1>PlaniX Secure System Analysis Report</h1>
+    <p><strong>Project:</strong> {{ project.name }}</p>
+    <p><strong>Generated:</strong> {{ analysis.created_at }}</p>
+    <hr>
+
+    <div class="section">
+        <div class="label">System Architecture</div>
+        <pre>{{ analysis.architecture }}</pre>
+    </div>
+
+    <div class="section">
+        <div class="label">Threat Model</div>
+        <pre>{{ analysis.threat_model }}</pre>
+    </div>
+
+    <div class="section">
+        <div class="label">Secure SDLC Recommendations</div>
+        <pre>{{ analysis.sdls_recommendations }}</pre>
+    </div>
+
+    <div class="section">
+        <div class="label">Cost Estimation Guidance</div>
+        <pre>{{ analysis.cost_estimation }}</pre>
+    </div>
+
+    <div class="section">
+        <div class="label">Security Testing Plan</div>
+        <pre>{{ analysis.testing_plan }}</pre>
+    </div>
+
+</body>
+</html>

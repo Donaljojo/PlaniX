@@ -26,14 +26,17 @@ def _get_available_model():
         models = genai.list_models()
 
         preferred_order = [
-            "gemini-1.0-pro",
-            "gemini-1.5-flash",
-            "gemini-1.5-flash-latest",
-            "gemini-1.5-flash-8b",
-            "gemini-1.5-pro",
+            "gemini-2.5-flash",
+            "gemini-flash-latest",
+            "gemini-2.5-pro",
+            "gemini-pro-latest",
         ]
 
-        available = [m.name for m in models if "generateContent" in m.supported_generation_methods]
+        available = [
+            m.name.replace("models/", "")
+            for m in models
+            if "generateContent" in m.supported_generation_methods
+        ]
 
         for model in preferred_order:
             if model in available:
@@ -46,11 +49,11 @@ def _get_available_model():
             return available[0]
 
         print("No models available.")
-        return None
+        return "ERROR: No models available that support 'generateContent'."
 
     except Exception as e:
         print(f"Error listing models: {e}")
-        return None
+        return f"ERROR: Could not list models from Gemini. Details: {e}"
 
 
 def generate_ai_analysis(prompt):
@@ -97,8 +100,8 @@ SECURITY TESTING PLAN
 
     model_name = _get_available_model()
 
-    if not model_name:
-        return "ERROR: No supported Gemini model available. Please ensure your API key is correct and that you have access to a model that supports 'generateContent'."
+    if not model_name or model_name.startswith("ERROR:"):
+        return model_name or "ERROR: No supported Gemini model available. Please ensure your API key is correct and that you have access to a model that supports 'generateContent'."
 
     try:
         model = genai.GenerativeModel(model_name)

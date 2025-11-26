@@ -12,6 +12,10 @@
     <a href="{% url 'generate_analysis' project.id %}">
         Generate Secure Analysis
     </a>
+    <a href="{% url 'analysis_history' project.id %}" class="btn btn-info mt-2">
+        View Analysis History
+    </a>
+
         </li>
     {% empty %}
         <p>No projects yet.</p>

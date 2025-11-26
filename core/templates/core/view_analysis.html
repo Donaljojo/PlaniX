@@ -3,3 +3,48 @@
 <pre>{{ analysis.architecture }}</pre>
 
 <a href="/">← Back to Dashboard</a>
+{% extends 'core/dashboard.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">{{ project.name }} — Security Analysis Report</h2>
+
+    <div class="card mb-3">
+        <div class="card-header"><strong>System Architecture</strong></div>
+        <div class="card-body">
+            <pre style="white-space: pre-wrap;">{{ analysis.architecture }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header"><strong>Threat Model</strong></div>
+        <div class="card-body">
+            <pre style="white-space: pre-wrap;">{{ analysis.threat_model }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header"><strong>Secure SDLC Recommendations</strong></div>
+        <div class="card-body">
+            <pre style="white-space: pre-wrap;">{{ analysis.sdls_recommendations }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header"><strong>Cost Estimation</strong></div>
+        <div class="card-body">
+            <pre style="white-space: pre-wrap;">{{ analysis.cost_estimation }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header"><strong>Security Testing Plan</strong></div>
+        <div class="card-body">
+            <pre style="white-space: pre-wrap;">{{ analysis.testing_plan }}</pre>
+        </div>
+    </div>
+
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

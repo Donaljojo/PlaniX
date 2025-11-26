@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from core.forms import ProjectForm
+from core.models.project import Project
+
 
 @login_required
 def create_project(request):

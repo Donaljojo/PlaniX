@@ -22,26 +22,11 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
-    tech_stack = models.CharField(max_length=255, help_text="e.g., Django, React, PostgreSQL")
-    scale = models.CharField(max_length=255, help_text="e.g., small, medium, large system")
-    budget = models.PositiveIntegerField(help_text="Estimated available budget")
+    tech_stack = models.CharField(max_length=255)
+    scale = models.CharField(max_length=255)
+    budget = models.PositiveIntegerField()
     risk_level = models.CharField(max_length=20, choices=RISK_LEVEL_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
-
-class ProjectAnalysis(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="analyses")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    architecture = models.TextField(blank=True)
-    threat_model = models.TextField(blank=True)
-    cost_estimation = models.TextField(blank=True)
-    sdls_recommendations = models.TextField(blank=True)
-    testing_plan = models.TextField(blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Analysis for {self.project.name} ({self.created_at})"

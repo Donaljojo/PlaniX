@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from core.models import Project, ProjectAnalysis
 from core.services.ai_client import generate_ai_analysis
-
+from core.models.project import Project
+from core.models.project_analysis import ProjectAnalysis
 
 @login_required
 def generate_analysis(request, project_id):

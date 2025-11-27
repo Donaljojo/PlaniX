@@ -15,6 +15,7 @@ urlpatterns = [
     path("project/<int:project_id>/analysis/history/", history_analysis, name="analysis_history"),
     path("analysis/<int:analysis_id>/pdf/", download_analysis_pdf, name="download_analysis_pdf"),
 
+
     # Dashboard last (so it doesn't override other routes)
     path("", dashboard, name="dashboard"),
 ]

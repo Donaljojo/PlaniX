@@ -88,14 +88,23 @@ def view_analysis(request, analysis_id):
 def history_analysis(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
 
-    analyses = ProjectAnalysis.objects.filter(
-        project=project
-    ).order_by("-created_at")
+    analyses = ProjectAnalysis.objects.filter(project=project).order_by("-created_at")
+
+    scores = [a.security_score for a in analyses if a.security_score > 0]
+
+    trend_data = {
+        "highest": max(scores) if scores else 0,
+        "lowest": min(scores) if scores else 0,
+        "average": sum(scores)/len(scores) if scores else 0,
+        "improving": scores[-1] < scores[0] if len(scores) > 1 else False
+    }
 
     return render(request, "core/analysis_history.html", {
         "project": project,
-        "analyses": analyses
+        "analyses": analyses,
+        "trend": trend_data
     })
+
 
 @login_required
 def download_analysis_pdf(request, analysis_id):

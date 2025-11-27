@@ -4,6 +4,22 @@
 <div class="container mt-4">
     <h2>Analysis History — {{ project.name }}</h2>
 
+    <h3>Risk Summary</h3>
+<ul>
+    <li><strong>Highest Risk Score:</strong> {{ trend.highest }}</li>
+    <li><strong>Lowest Risk Score:</strong> {{ trend.lowest }}</li>
+    <li><strong>Average Score:</strong> {{ trend.average|floatformat:2 }}</li>
+    <li>
+        <strong>Trend Direction:</strong>
+        {% if trend.improving %}
+            <span class="text-success">Improving ↑</span>
+        {% else %}
+            <span class="text-danger">Worsening ↓</span>
+        {% endif %}
+    </li>
+</ul>
+<canvas id="riskChart" height="120"></canvas>
+
     {% if analyses %}
         <ul class="list-group mt-3">
             {% for analysis in analyses %}
@@ -35,6 +51,46 @@
 
     <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back</a>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const labels = [
+        {% for a in analyses reversed %}
+            "{{ a.created_at|date:'M d H:i' }}",
+        {% endfor %}
+    ];
+
+    const scores = [
+        {% for a in analyses reversed %}
+            {{ a.security_score }},
+        {% endfor %}
+    ];
+
+    const ctx = document.getElementById('riskChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Security Risk Score',
+                data: scores,
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            }
+        }
+    });
+});
+</script>
+
+
 {% endblock %}
 
 

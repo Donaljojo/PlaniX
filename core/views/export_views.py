@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from core.models.project_analysis import ProjectAnalysis
+from core.models.project import Project
 import io
 import zipfile
 from django.utils.text import slugify

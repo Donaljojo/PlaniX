@@ -14,6 +14,7 @@ class ProjectAnalysis(models.Model):
     testing_plan = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    executive_summary = models.TextField(blank=True)
 
     security_score = models.IntegerField(default=0)
     risk_category = models.CharField(max_length=20, default="Unknown")

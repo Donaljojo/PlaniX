@@ -10,27 +10,46 @@ from core.services.security_scoring import calculate_final_security_score
 from django.contrib import messages
 
 
+# -------------------------------
+# Section Extractor
+# -------------------------------
 def extract_section(text, header):
+    """
+    Extract content under a section header until the next known header.
+    """
     if header not in text:
         return ""
+
     section = text.split(header, 1)[1]
-    for next_header in [
+
+    NEXT_HEADERS = [
+        "EXECUTIVE SUMMARY",
+        "SYSTEM ARCHITECTURE",
         "THREAT MODEL",
         "SECURE SDLC",
-        "COST",
-        "SECURITY TESTING PLAN"
-    ]:
-        if next_header in section and header not in next_header:
+        "COST ESTIMATION",
+        "SECURITY TESTING PLAN",
+    ]
+
+    for next_header in NEXT_HEADERS:
+        if next_header in section and next_header != header:
             section = section.split(next_header, 1)[0]
             break
+
     return section.strip()
 
+
+# -------------------------------
+# Generate Analysis
+# -------------------------------
 @login_required
 def generate_analysis(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
 
+    # Enhanced prompt with EXECUTIVE SUMMARY section
     prompt = f"""
-Generate a secure system analysis for:
+You are a security architect AI. Generate a structured secure system analysis for the following project:
+
 Name: {project.name}
 Description: {project.description}
 Platform: {project.platform}
@@ -39,26 +58,38 @@ Scale: {project.scale}
 Budget: {project.budget}
 Risk Level: {project.risk_level}
 
-Provide:
-1. SYSTEM ARCHITECTURE
-2. THREAT MODEL (STRIDE + OWASP relevance)
-3. COST ESTIMATION guidance
-4. SECURE SDLC recommendations
-5. SECURITY TESTING PLAN and tools
+Your response must contain sections with EXACT HEADERS:
+
+EXECUTIVE SUMMARY
+SYSTEM ARCHITECTURE
+THREAT MODEL
+SECURE SDLC
+COST ESTIMATION
+SECURITY TESTING PLAN
+
+EXECUTIVE SUMMARY must include:
+- Overall security posture (1–2 sentences)
+- Top 3 critical risks
+- Immediate actions recommended
+
+Make sure each section begins with its header in uppercase.
 """
 
     generated_text = generate_ai_analysis(prompt)
 
+    # Extract sections
+    executive_summary = extract_section(generated_text, "EXECUTIVE SUMMARY")
     architecture = extract_section(generated_text, "SYSTEM ARCHITECTURE")
     threat_model = extract_section(generated_text, "THREAT MODEL")
-    cost_estimation = extract_section(generated_text, "COST")
     sdls_recommendations = extract_section(generated_text, "SECURE SDLC")
+    cost_estimation = extract_section(generated_text, "COST ESTIMATION")
     testing_plan = extract_section(generated_text, "SECURITY TESTING PLAN")
 
-    # Save initial analysis
+    # Save analysis
     analysis = ProjectAnalysis.objects.create(
         project=project,
         user=request.user,
+        executive_summary=executive_summary,
         architecture=architecture,
         threat_model=threat_model,
         cost_estimation=cost_estimation,
@@ -66,7 +97,7 @@ Provide:
         testing_plan=testing_plan,
     )
 
-    # ✅ Hybrid security scoring applied here
+    # Apply hybrid security scoring
     score, category = calculate_final_security_score(project)
     analysis.security_score = score
     analysis.risk_category = category
@@ -77,19 +108,26 @@ Provide:
     return redirect("view_analysis", analysis_id=analysis.id)
 
 
+# -------------------------------
+# View Single Analysis
+# -------------------------------
 @login_required
 def view_analysis(request, analysis_id):
     analysis = get_object_or_404(ProjectAnalysis, id=analysis_id, user=request.user)
-    return render(request, "core/view_analysis.html", {"analysis": analysis, "project": analysis.project})
+    return render(request, "core/view_analysis.html", {
+        "analysis": analysis,
+        "project": analysis.project
+    })
 
 
-
+# -------------------------------
+# Analysis History
+# -------------------------------
 @login_required
 def history_analysis(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
 
     analyses = ProjectAnalysis.objects.filter(project=project).order_by("-created_at")
-
     scores = [a.security_score for a in analyses if a.security_score > 0]
 
     trend_data = {
@@ -106,6 +144,9 @@ def history_analysis(request, project_id):
     })
 
 
+# -------------------------------
+# Export PDF
+# -------------------------------
 @login_required
 def download_analysis_pdf(request, analysis_id):
     analysis = get_object_or_404(ProjectAnalysis, id=analysis_id, user=request.user)
@@ -119,5 +160,7 @@ def download_analysis_pdf(request, analysis_id):
     pdf_file = HTML(string=html_content).write_pdf()
 
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="analysis_{analysis_id}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename=\"analysis_{analysis_id}.pdf\"'
     return response
+
+

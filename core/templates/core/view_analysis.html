@@ -3,17 +3,20 @@
 {% block content %}
 <div class="container mt-4">
 
-    <h2 class="mb-4">{{ project.name }} — Security Analysis Report</h2>
+    <h2>{{ project.name }} — Security Analysis Report</h2>
+    <p class="text-muted">Generated on {{ analysis.created_at }}</p>
 
-    {% if analysis.risk_category == "High Risk" %}
-    <span class="badge bg-danger">High Risk — {{ analysis.security_score }}</span>
-    {% elif analysis.risk_category == "Medium Risk" %}
-    <span class="badge bg-warning text-dark">Medium Risk — {{ analysis.security_score }}</span>
-    {% else %}
-    <span class="badge bg-success">Low Risk — {{ analysis.security_score }}</span>
-    {% endif %}
+    <!-- EXECUTIVE SUMMARY -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <strong>Executive Summary</strong>
+        </div>
+        <div class="card-body">
+            <pre style="white-space: pre-wrap;">{{ analysis.executive_summary }}</pre>
+        </div>
+    </div>
 
-
+    <!-- SYSTEM ARCHITECTURE -->
     <div class="card mb-3">
         <div class="card-header"><strong>System Architecture</strong></div>
         <div class="card-body">
@@ -21,13 +24,15 @@
         </div>
     </div>
 
+    <!-- THREAT MODEL -->
     <div class="card mb-3">
-        <div class="card-header"><strong>Threat Model (STRIDE + OWASP)</strong></div>
+        <div class="card-header"><strong>Threat Model</strong></div>
         <div class="card-body">
             <pre style="white-space: pre-wrap;">{{ analysis.threat_model }}</pre>
         </div>
     </div>
 
+    <!-- SECURE SDLC -->
     <div class="card mb-3">
         <div class="card-header"><strong>Secure SDLC Recommendations</strong></div>
         <div class="card-body">
@@ -35,13 +40,15 @@
         </div>
     </div>
 
+    <!-- COST ESTIMATION -->
     <div class="card mb-3">
-        <div class="card-header"><strong>Cost Estimation Guidance</strong></div>
+        <div class="card-header"><strong>Cost Estimation</strong></div>
         <div class="card-body">
             <pre style="white-space: pre-wrap;">{{ analysis.cost_estimation }}</pre>
         </div>
     </div>
 
+    <!-- SECURITY TESTING PLAN -->
     <div class="card mb-3">
         <div class="card-header"><strong>Security Testing Plan</strong></div>
         <div class="card-body">
@@ -49,6 +56,13 @@
         </div>
     </div>
 
+    <!-- RISK SCORE -->
+    <div class="alert alert-info">
+        <strong>Security Score:</strong> {{ analysis.security_score }}<br>
+        <strong>Risk Category:</strong> {{ analysis.risk_category }}
+    </div>
+
+    <a href="{% url 'download_analysis_pdf' analysis.id %}" class="btn btn-success">Download PDF</a>
     <a href="{% url 'analysis_history' project.id %}" class="btn btn-info mt-2">
         View Analysis History
     </a>
@@ -57,9 +71,6 @@
         Back to Dashboard
     </a>
 
-    <a href="{% url 'download_analysis_pdf' analysis.id %}" class="btn btn-success mt-2">
-    Download PDF Report
-</a>
 
 <a href="{% url 'export_analysis_md' analysis.id %}"
    class="btn btn-info mt-2">
@@ -70,9 +81,9 @@
    class="btn btn-dark mt-2">
     Download as Text
 </a>
+    <a href="{% url 'analysis_history' project.id %}" class="btn btn-secondary">Back</a>
 
 </div>
 {% endblock %}
-
 
 
